@@ -1,9 +1,66 @@
-import example.pepita
+import clases.*
 
-describe "group of tests for pepita" {
+describe "test general" { 
+  
+  /*Provincias*/
+  const buenosAires = new Provincia()
+  const santaFe = new Provincia()
+  const corrientes = new Provincia()
+  const cordoba = new Provincia()
+  const entreRios = new Provincia()
 
-  test "pepita has initial energy" {
-    assert.equals(100, pepita.energy())
+  /*Universidades*/
+    const sanMartin = new Universidad(provincia = buenosAires, honorariosRecomendados = 3500)
+    const rosario = new Universidad(provincia = santaFe, honorariosRecomendados = 2800)
+    const corrientesCapital = new Universidad(provincia = corrientes, honorariosRecomendados = 4200)
+    const hurlingham = new Universidad(provincia = buenosAires, honorariosRecomendados = 8800)
+    const cordobaCapital = new Universidad(provincia = cordoba, honorariosRecomendados = 0) /* honorariosRecomendados es cero porque no hay valor de referencia en el enunciado y el profesional libre puede cobrar sus honorarios sin influencia de la universidad */
+    const entreRiosCapital = new Universidad(provincia = entreRios, honorariosRecomendados = 0)
+
+  /*Profesionales*/
+    const juana = new ProfesionalDeUnaUniversidad(universidadDondeEstudio = rosario, provinciasDondeTrabaja = santaFe)
+    const melina = new ProfesionalDelLitoral(universidadDondeEstudio = corrientesCapital, provinciasDondeTrabaja = [entreRios, santaFe, corrientes] )
+    const rocio = new ProfesionalLibre(universidadDondeEstudio = hurlingham, honorarios = 5000, provinciasDondeTrabaja = [santaFe, cordoba, buenosAires])
+    const luciana = new ProfesionalLibre(universidadDondeEstudio = rosario, honorarios = 3200, provinciasDondeTrabaja = [santaFe, entreRios])
+
+  /*Empresa para el caso de prueba */
+    const lumix = new Empresa (honorarioReferencia = 3500)
+
+    method initialize(){
+      lumix.contratarProfesional(juana)
+      lumix.contratarProfesional(melina)
+      lumix.contratarProfesional(rocio)
+      lumix.contratarProfesional(luciana)
+    }
+
+  test "Dos de sus profesionales estudiaron en Rosario, uno en Hurlingham, ninguno (o sea cero) en San Martín." {
+    assert.equals(2, lumix.cuantosProfesionalesEstudiaronEn(rosario))
+    assert.equals(1, lumix.cuantosProfesionalesEstudiaronEn(hurlingham))
+    assert.equals(0, lumix.cuantosProfesionalesEstudiaronEn(sanMartin))
   }
 
+  test "como profesionales caros, solamente a Rocío. ¡OJO! el método no va a devolver a Rocío, va a devolver una colección que tiene un solo elemento, que es Rocío." {
+    assert.equals(#{rocio}, lumix.profesionalesCaros())
+  }
+
+  test "como universidades formadoras, a las de Rosario, Corrientes y Hurlingham."{
+    assert.equals(#{rosario, corrientesCapital, hurlingham}, lumix.universidadesFormadoras() )
+  }
+
+  test "el profesional más barato (o sea, que sus honorarios son los más bajos)." {
+    assert.equals(juana, lumix.profesionalMasBarato())
+  }
+
+  test "si es de gente acotada (o sea, ningún profesional está habilitado para más de tres provincias, o lo que es equivalente, todos trabajan en a lo sumo tres provincias)." {
+    assert.that(lumix.esDeGenteAcotada())
+  }
+
+  test "si le agregamos a Luciana dos provincias más (p.ej. Corrientes y Misiones)" {
+    const misiones = new Provincia()
+    
+    luciana.añadirProvincia(misiones)
+    luciana.añadirProvincia(corrientes)
+
+    assert.notThat(lumix.esDeGenteAcotada())
+  }
 }
